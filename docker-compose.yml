@@ -1,0 +1,11 @@
+services:
+  timereg:
+    image: ghcr.io/larsjnielsen09/timereg:latest
+    container_name: timereg
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    environment:
+      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
+      - ORIGIN=${ORIGIN}
