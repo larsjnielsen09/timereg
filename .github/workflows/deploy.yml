@@ -25,6 +25,9 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/larsjnielsen09/timereg:latest
+          build-args: |
+            PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}
+            PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Deploy til VPS
         uses: appleboy/ssh-action@v1
