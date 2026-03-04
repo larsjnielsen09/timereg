@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "001-add-edit-and-delete-actions-to-the-task-list-on-th",
+  "state": "building",
+  "subtasks": {
+    "completed": 2,
+    "total": 3,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Integration Verification",
+    "id": null,
+    "total": 1
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 3,
+    "started_at": "2026-03-04T20:09:08.430377"
+  },
+  "last_update": "2026-03-04T20:13:37.212792"
+}
