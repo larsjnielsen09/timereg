@@ -11,6 +11,14 @@
   let tilDato = '';
   let totalTimer = 0;
 
+  let redigerOpgaveId: number | null = null;
+  let sletOpgaveId: number | null = null;
+  let redigerKundeId = '';
+  let redigerDato = '';
+  let redigerTimer = '';
+  let redigerBeskrivelse = '';
+  let redigerBesked = '';
+
   onMount(async () => {
     await hentKunder();
     await hentOpgaver();
@@ -53,6 +61,63 @@
     fraDato = '';
     tilDato = '';
     filtrer();
+  }
+
+  function startRediger(opgave: any) {
+    redigerOpgaveId = opgave.id;
+    sletOpgaveId = null;
+    redigerKundeId = opgave.kunde_id;
+    redigerDato = opgave.dato;
+    redigerTimer = opgave.timer.toString();
+    redigerBeskrivelse = opgave.beskrivelse ?? '';
+  }
+
+  function annullerRediger() {
+    redigerOpgaveId = null;
+    redigerBesked = '';
+  }
+
+  async function gemRediger() {
+    const { error } = await supabase
+      .from('opgaver')
+      .update({
+        kunde_id: redigerKundeId,
+        dato: redigerDato,
+        timer: parseFloat(redigerTimer),
+        beskrivelse: redigerBeskrivelse
+      })
+      .eq('id', redigerOpgaveId);
+
+    if (error) {
+      redigerBesked = 'Fejl ved opdatering: ' + error.message;
+    } else {
+      redigerOpgaveId = null;
+      await hentOpgaver();
+    }
+  }
+
+  function bekræftSlet(opgave: any) {
+    sletOpgaveId = opgave.id;
+    redigerOpgaveId = null;
+  }
+
+  function annullerSlet() {
+    sletOpgaveId = null;
+  }
+
+  async function sletOpgave() {
+    const { error } = await supabase
+      .from('opgaver')
+      .delete()
+      .eq('id', sletOpgaveId);
+
+    if (error) {
+      redigerBesked = 'Fejl ved sletning: ' + error.message;
+      sletOpgaveId = null;
+    } else {
+      sletOpgaveId = null;
+      await hentOpgaver();
+    }
   }
 </script>
 
