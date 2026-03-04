@@ -11,6 +11,14 @@
   let tilDato = '';
   let totalTimer = 0;
 
+  let redigerOpgaveId: number | null = null;
+  let sletOpgaveId: number | null = null;
+  let redigerKundeId = '';
+  let redigerDato = '';
+  let redigerTimer = '';
+  let redigerBeskrivelse = '';
+  let redigerBesked = '';
+
   onMount(async () => {
     await hentKunder();
     await hentOpgaver();
@@ -53,6 +61,63 @@
     fraDato = '';
     tilDato = '';
     filtrer();
+  }
+
+  function startRediger(opgave: any) {
+    redigerOpgaveId = opgave.id;
+    sletOpgaveId = null;
+    redigerKundeId = opgave.kunde_id;
+    redigerDato = opgave.dato;
+    redigerTimer = opgave.timer.toString();
+    redigerBeskrivelse = opgave.beskrivelse ?? '';
+  }
+
+  function annullerRediger() {
+    redigerOpgaveId = null;
+    redigerBesked = '';
+  }
+
+  async function gemRediger() {
+    const { error } = await supabase
+      .from('opgaver')
+      .update({
+        kunde_id: redigerKundeId,
+        dato: redigerDato,
+        timer: parseFloat(redigerTimer),
+        beskrivelse: redigerBeskrivelse
+      })
+      .eq('id', redigerOpgaveId);
+
+    if (error) {
+      redigerBesked = 'Fejl ved opdatering: ' + error.message;
+    } else {
+      redigerOpgaveId = null;
+      await hentOpgaver();
+    }
+  }
+
+  function bekræftSlet(opgave: any) {
+    sletOpgaveId = opgave.id;
+    redigerOpgaveId = null;
+  }
+
+  function annullerSlet() {
+    sletOpgaveId = null;
+  }
+
+  async function sletOpgave() {
+    const { error } = await supabase
+      .from('opgaver')
+      .delete()
+      .eq('id', sletOpgaveId);
+
+    if (error) {
+      redigerBesked = 'Fejl ved sletning: ' + error.message;
+      sletOpgaveId = null;
+    } else {
+      sletOpgaveId = null;
+      await hentOpgaver();
+    }
   }
 </script>
 
@@ -114,16 +179,100 @@
 
     <!-- Opgaveliste -->
     <div class="bg-white rounded overflow-hidden">
-        {#each filtreretOpgaver as opgave}
+      {#each filtreretOpgaver as opgave}
         <div class="p-4 border-b last:border-b-0">
+          {#if redigerOpgaveId === opgave.id}
+            <!-- Inline edit form -->
+            <div class="space-y-3">
+              <div>
+                <label class="block text-gray-700 mb-1">Kunde</label>
+                <select bind:value={redigerKundeId}
+                  class="w-full p-2 rounded border border-gray-300 bg-white text-sm">
+                  {#each kunder as kunde}
+                    <option value={kunde.id}>{kunde.navn}</option>
+                  {/each}
+                </select>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="flex-1">
+                  <label class="block text-gray-700 mb-1">Dato</label>
+                  <input type="date" bind:value={redigerDato}
+                    class="w-full p-2 rounded border border-gray-300 bg-white text-sm" />
+                </div>
+                <div class="flex-1">
+                  <label class="block text-gray-700 mb-1">Timer</label>
+                  <input type="number" bind:value={redigerTimer} step="0.5" min="0"
+                    class="w-full p-2 rounded border border-gray-300 bg-white text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-gray-700 mb-1">Beskrivelse</label>
+                <textarea bind:value={redigerBeskrivelse} rows="2"
+                  class="w-full p-2 rounded border border-gray-300 bg-white text-sm resize-none"></textarea>
+              </div>
+
+              {#if redigerBesked}
+                <p class="text-red-600 text-sm">{redigerBesked}</p>
+              {/if}
+
+              <div class="flex gap-2">
+                <button on:click={gemRediger}
+                  class="px-4 py-2 text-white rounded text-sm"
+                  style="background-color: #3a6b68;">
+                  Gem
+                </button>
+                <button on:click={annullerRediger}
+                  class="px-4 py-2 text-gray-700 rounded text-sm border border-gray-300">
+                  Annuller
+                </button>
+              </div>
+            </div>
+          {:else}
+            <!-- Normal row display -->
             <div style="display: grid; grid-template-columns: 1fr auto;">
-            <p class="font-bold">{opgave.kunder?.navn}</p>
-            <span class="font-bold text-lg">{opgave.timer} timer</span>
+              <p class="font-bold">{opgave.kunder?.navn}</p>
+              <div class="flex items-center gap-1">
+                <span class="font-bold text-lg">{opgave.timer} timer</span>
+                <button on:click={() => startRediger(opgave)}
+                  class="p-1 text-gray-400 hover:text-gray-700"
+                  title="Rediger">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+                <button on:click={() => bekræftSlet(opgave)}
+                  class="p-1 text-gray-400 hover:text-red-600"
+                  title="Slet">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <p class="text-sm text-gray-500">{formaterDato(opgave.dato)}</p>
             <p class="mt-1">{opgave.beskrivelse ?? ''}</p>
+
+            <!-- Delete confirmation -->
+            {#if sletOpgaveId === opgave.id}
+              <div class="mt-2 p-2 bg-red-50 rounded flex items-center justify-between">
+                <span class="text-sm text-red-700">Slet denne opgave?</span>
+                <div class="flex gap-2">
+                  <button on:click={sletOpgave}
+                    class="px-3 py-1 text-white text-sm rounded bg-red-600 hover:bg-red-700">
+                    Ja
+                  </button>
+                  <button on:click={annullerSlet}
+                    class="px-3 py-1 text-gray-700 text-sm rounded border border-gray-300">
+                    Nej
+                  </button>
+                </div>
+              </div>
+            {/if}
+          {/if}
         </div>
-        {/each}
+      {/each}
 
       {#if filtreretOpgaver.length === 0}
         <p class="p-4 text-gray-500 text-center">Ingen opgaver fundet</p>
