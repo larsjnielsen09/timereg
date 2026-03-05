@@ -3,7 +3,8 @@ name: Build og Deploy - Staging
 on:
   push:
     branches: [main]
-
+  workflow_dispatch:
+  
 permissions:
   contents: read
   packages: write
