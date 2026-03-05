@@ -1,10 +1,9 @@
-name: Build og Deploy - Staging
-
+name: Build og Deploy - Production
 
 on:
   push:
     branches: [main]
-    workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
   contents: read
