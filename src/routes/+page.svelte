@@ -72,8 +72,9 @@
     </div>
 
     <!-- Navigation -->
-    <div class="mb-4 text-right">
-      <a href="/oversigt" class="text-white underline">Se alle opgaver →</a>
+    <div class="mb-4 text-right space-y-2">
+      <div><a href="/oversigt" class="text-white underline">Se alle opgaver →</a></div>
+      <div><a href="/kunder" class="text-white underline">Administrer kunder →</a></div>
     </div>
 
     <!-- Formular -->

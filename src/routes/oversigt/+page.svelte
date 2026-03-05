@@ -134,6 +134,11 @@
       <a href="/" class="text-white underline">← Tilbage til registrering</a>
     </div>
 
+    <!-- Kunde administration -->
+    <div class="mb-4">
+      <a href="/kunder" class="text-white underline">Administrer kunder →</a>
+    </div>
+
     <!-- Filtrering -->
     <div class="bg-white rounded p-4 mb-6 space-y-3">
       <div>
